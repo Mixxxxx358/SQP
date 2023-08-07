@@ -1,0 +1,17 @@
+/development/
+/deepSI.egg-info/
+__pycache__/
+c_generated_code/
+/build/
+trained_models/
+references/
+experiments/
+Figures/
+.ipynb_checkpoints
+data/
+.png
+.svg
+.json
+
+## ignore hidden files!
+# .*
