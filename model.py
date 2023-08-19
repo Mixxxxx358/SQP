@@ -27,8 +27,9 @@ def export_ode_model() -> AcadosModel:
 
     # dynamics
     f_expl = vertcat(-M*g*I/J*sin(theta) - 1/tau*dtheta + Km/tau*F, dtheta)
-    h_disc = vertcat(sin(theta), cos(theta), dtheta)
-    h_disc_e = vertcat(sin(theta), cos(theta), dtheta)
+    h_disc = vertcat(theta, dtheta)
+    # h_disc = vertcat(sin(theta), cos(theta), dtheta)
+    # h_disc_e = vertcat(sin(theta), cos(theta), dtheta)
 
     model = AcadosModel()
 
@@ -37,7 +38,7 @@ def export_ode_model() -> AcadosModel:
     model.u = u
     model.name = model_name
     model.cost_y_expr = h_disc
-    model.cost_y_expr_e = h_disc_e
+    model.cost_y_expr_e = h_disc
 
     return model
 
@@ -113,6 +114,7 @@ def export_casadi_fn(system) -> AcadosModel:
     model.u = u
     model.name = 'unbalanced_disc_fn'
     model.disc_dyn_expr = f_expr
+    # model.dyn_disc_fun = f_expr
 
     return model
 
