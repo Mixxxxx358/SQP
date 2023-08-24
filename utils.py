@@ -78,7 +78,7 @@ def plot_pendulum(shooting_nodes, u_max, U, X_true, reference, X_est=None, Y_mea
         plt.grid()
         plt.legend(loc=1)
 
-    plt.subplot(3,1,3)
+    plt.subplot(3,1,2)
     plt.plot(t, reference[:N_sim], 'k--', label='reference', alpha=0.8, linewidth=1)
 
     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, hspace=0.4)
@@ -141,3 +141,13 @@ def randomLevelReference(Nsim, nt_range, level_range):
             x_reference_list = x_reference_list[:Nsim]
             break
     return x_reference_list
+
+def setPointInput(y_ref):
+    g = 9.80155078791343
+    J = 0.000244210523960356
+    Km = 10.5081817407479
+    I = 0.0410772235841364
+    M = 0.0761844495320390
+    tau = 0.397973147009910
+
+    return (tau * M * g * I)/(Km * J) * np.sin(y_ref)

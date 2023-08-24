@@ -69,6 +69,31 @@ def CasADi_Fn(ss_enc, cas_x, cas_u):
 
     return nn_NL + nn_Lin
 
+def CasADi_Hn(ss_enc, cas_x):
+    n_hidden_layers = 2#ss_enc.h_n_hidden_layers
+
+    params = {}
+    for name, param in ss_enc.hn.named_parameters():
+        params[name] = param.detach().numpy()
+    params_list = list(params.values())
+
+    temp_nn = cas_x
+    for i in range(n_hidden_layers):
+        W_NL = params_list[2+i*2]
+        b_NL = params_list[3+i*2]
+        temp_nn = mtimes(W_NL, temp_nn)+b_NL
+        temp_nn = tanh(temp_nn)
+    W_NL = params_list[2+n_hidden_layers*2]
+    b_NL = params_list[3+n_hidden_layers*2]
+    nn_NL = mtimes(W_NL, temp_nn)+b_NL
+
+    W_Lin = params_list[0]
+    b_Lin = params_list[1]
+    nn_Lin = mtimes(W_Lin,cas_x) + b_Lin
+
+    return nn_NL + nn_Lin
+
+
 class SinCos_encoder(deepSI.fit_systems.SS_encoder_general):
     def __init__(self, nx=10, na=20, nb=20, na_right=0, nb_right=0, e_net_kwargs={}, f_net_kwargs={}, h_net_kwargs={}):
         super(SinCos_encoder, self).__init__(nx=nx, na=na, nb=nb, na_right=na_right, nb_right=nb_right, e_net_kwargs=e_net_kwargs, f_net_kwargs=f_net_kwargs, h_net_kwargs=h_net_kwargs)
@@ -106,6 +131,7 @@ def export_casadi_fn(system) -> AcadosModel:
     ny = system.ny if system.ny is not None else 1
 
     f_expr = CasADi_Fn(system, x, u)
+    h_expr = CasADi_Hn(system, x)
 
     model = AcadosModel()
 
@@ -114,7 +140,8 @@ def export_casadi_fn(system) -> AcadosModel:
     model.u = u
     model.name = 'unbalanced_disc_fn'
     model.disc_dyn_expr = f_expr
-    # model.dyn_disc_fun = f_expr
+    model.cost_y_expr = vertcat(h_expr, u)
+    model.cost_y_expr_e = vertcat(h_expr)
 
     return model
 
